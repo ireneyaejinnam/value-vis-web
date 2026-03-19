@@ -1,5 +1,7 @@
 # ValueVis
 
+**Live app: [value-vis-web.vercel.app](https://value-vis-web.vercel.app)**
+
 A web app for aligning daily tasks, habits, and goals with your core values. Built with React, TypeScript, and Tailwind CSS.
 
 ## Features
