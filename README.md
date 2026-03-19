@@ -1,73 +1,66 @@
-# React + TypeScript + Vite
+# ValueVis
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web app for aligning daily tasks, habits, and goals with your core values. Built with React, TypeScript, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Values** — Select up to 3 core values from Schwartz Value Theory and track how your daily actions reflect them
+- **Calendar** — View and manage events, link them to your values, and practice mental rehearsal. Supports Google Calendar import
+- **Todo** — Task management organized by project and priority, with value linking
+- **Habits** — Morning and evening routines tied to your values
+- **Coach** — AI-powered chat coach that knows your values, goals, and progress
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
 
-## Expanding the ESLint configuration
+- Node.js 18+
+- A Firebase project with Google Sign-In enabled
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Installation
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone https://github.com/ireneyaejinnam/value-vis-web.git
+cd value-vis-web
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Configuration
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Create a `.env` file in the root (see `.env.example`):
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_OPENAI_API_KEY=your_openai_api_key   # optional — app runs in demo mode without it
 ```
+
+Update `src/config/firebase.ts` with your own Firebase project config.
+
+### Running locally
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+### Building for production
+
+```bash
+npm run build
+npm run preview
+```
+
+## Tech Stack
+
+- **React 19** + **TypeScript**
+- **Vite** — build tool
+- **Tailwind CSS** — styling
+- **Zustand** — state management (persisted to localStorage)
+- **React Router v6** — routing
+- **Firebase Auth** — Google Sign-In
+- **Google Calendar API** — calendar import
+- **OpenAI API** — streaming AI coach (optional)
+
+## Deployment
+
+The app is deployed on Vercel. Any push to `main` triggers an automatic redeploy.
