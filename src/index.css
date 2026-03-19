@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: #F3F6F6 !important;
+  color: #0D0D1A;
+  font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  background: #F3F6F6;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D0D3E0; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #b0b3c0; }
+
+/* Glass effect — light theme */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+/* Purple tint surface */
+.surface-tint {
+  background: rgba(99, 99, 225, 0.06);
+  border: 1px solid rgba(99, 99, 225, 0.12);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #6363E1, #9b8de8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Lavender welcome bg */
+.welcome-bg {
+  background: linear-gradient(160deg, #b8b0f0 0%, #a59ee9 40%, #8f87d8 100%);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-dot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade-in { animation: fadeIn 0.3s ease-out; }
+.animate-slide-up { animation: slideUp 0.35s ease-out; }
+
+/* Color variant accent styles */
+.color-coral  { background: rgba(232,154,122,0.12); border-color: rgba(232,154,122,0.35); }
+.color-blue   { background: rgba(122,154,232,0.12); border-color: rgba(122,154,232,0.35); }
+.color-mint   { background: rgba(122,232,208,0.12); border-color: rgba(122,232,208,0.35); }
+.color-purple { background: rgba(184,122,232,0.12); border-color: rgba(184,122,232,0.35); }
+.color-pink   { background: rgba(232,122,184,0.12); border-color: rgba(232,122,184,0.35); }
+
+/* Card hover */
+.card-hover {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.card-hover:hover {
+  box-shadow: 0 4px 20px rgba(99, 99, 225, 0.12);
+  transform: translateY(-1px);
+}
+
+/* Select dropdown */
+select {
+  color-scheme: light;
+}
