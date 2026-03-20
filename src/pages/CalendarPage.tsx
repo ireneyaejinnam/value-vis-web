@@ -228,9 +228,20 @@ export function CalendarPage() {
             {/* Rehearse button in sidebar */}
             <div className="p-3">
               <button onClick={() => setShowMR(true)}
-                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium border transition-colors ${mrCompleted ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-border bg-white text-text-muted hover:text-primary hover:border-primary/40'}`}
+                className="w-full rounded-2xl overflow-hidden border border-border hover:border-primary/40 hover:shadow-md transition-all group"
               >
-                <Brain size={14} />{mrCompleted ? 'Rehearsed ✓' : 'Mental Rehearsal'}
+                <img
+                  src={mrCompleted ? '/genie/rehearsal_complete.png' : '/genie/rehearsal_banner.png'}
+                  alt="Mental Rehearsal"
+                  className="w-full object-cover group-hover:opacity-95 transition-opacity"
+                  style={{ aspectRatio: '956/336' }}
+                />
+                <div className={`px-3 py-2 flex items-center justify-between ${mrCompleted ? 'bg-emerald-50' : 'bg-white'}`}>
+                  <span className={`text-xs font-semibold ${mrCompleted ? 'text-emerald-600' : 'text-primary'}`}>
+                    {mrCompleted ? 'Rehearsed ✓' : 'Mental Rehearsal'}
+                  </span>
+                  <Brain size={13} className={mrCompleted ? 'text-emerald-500' : 'text-primary'} />
+                </div>
               </button>
             </div>
           </div>

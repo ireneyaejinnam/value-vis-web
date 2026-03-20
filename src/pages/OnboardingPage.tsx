@@ -171,11 +171,11 @@ export function OnboardingPage() {
               <div className="animate-fade-in">
                 <div className="mb-8">
                   <h2 className="text-2xl font-bold text-text-primary mb-1">What's your priority?</h2>
-                  <p className="text-text-secondary">Choose your main focus area and a goal</p>
+                  <p className="text-text-secondary">Choose one or more focus areas and the goals you're working toward</p>
                 </div>
 
                 <div className="mb-8">
-                  <h3 className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">Focus Area</h3>
+                  <h3 className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">Focus Areas <span className="normal-case font-normal text-text-muted">— select all that apply</span></h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     {PRIORITY_CATEGORIES.map((cat) => {
                       const selected = store.priorityCategory.includes(cat.id);
@@ -183,44 +183,65 @@ export function OnboardingPage() {
                         <button key={cat.id} onClick={() => store.setPriorityCategory([cat.id])}
                           className={`p-4 rounded-2xl border text-left transition-all card-hover ${selected ? 'border-primary/50 bg-primary/10' : 'border-border bg-white hover:border-primary/30'}`}
                         >
+                          <div className="flex items-start justify-between gap-1 mb-2">
+                            <div className={`w-4 h-4 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${selected ? 'bg-primary border-primary' : 'border-border'}`}>
+                              {selected && <Check size={10} color="white" />}
+                            </div>
+                          </div>
                           <p className="text-sm font-semibold text-text-primary mb-1">{cat.label}</p>
                           <p className="text-xs text-text-muted">{cat.subGoals.length} goals</p>
-                          {selected && <div className="mt-2 w-1.5 h-1.5 rounded-full bg-primary" />}
                         </button>
                       );
                     })}
                   </div>
                 </div>
 
-                {store.priorityCategory.length > 0 && (
-                  <div className="mb-8 animate-fade-in">
-                    <h3 className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">Your Goal</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {PRIORITY_CATEGORIES.find((c) => store.priorityCategory.includes(c.id))?.subGoals.map((goal) => {
-                        const selected = store.subGoals.includes(goal);
-                        return (
-                          <button key={goal} onClick={() => store.toggleSubGoal(goal)}
-                            className={`p-3 rounded-xl border text-left text-sm transition-all card-hover ${selected ? 'border-primary/50 bg-primary/10 text-primary font-medium' : 'border-border bg-white text-text-secondary hover:text-text-primary hover:border-primary/30'}`}
-                          >
-                            {selected && <Check size={12} className="inline mr-1.5 mb-0.5" />}
-                            {goal}
-                          </button>
-                        );
-                      })}
+                {store.priorityCategory.length > 0 && (() => {
+                  const allGoals = PRIORITY_CATEGORIES
+                    .filter((c) => store.priorityCategory.includes(c.id))
+                    .flatMap((c) => c.subGoals.map((g) => ({ goal: g, area: c.label })));
+                  return (
+                    <div className="mb-8 animate-fade-in">
+                      <h3 className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">Your Goals <span className="normal-case font-normal text-text-muted">— pick as many as you like</span></h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {allGoals.map(({ goal, area }) => {
+                          const selected = store.subGoals.includes(goal);
+                          return (
+                            <button key={goal} onClick={() => store.toggleSubGoal(goal)}
+                              className={`p-3 rounded-xl border text-left text-sm transition-all card-hover ${selected ? 'border-primary/50 bg-primary/10 text-primary font-medium' : 'border-border bg-white text-text-secondary hover:text-text-primary hover:border-primary/30'}`}
+                            >
+                              {selected && <Check size={12} className="inline mr-1.5 mb-0.5" />}
+                              <span>{goal}</span>
+                              {store.priorityCategory.length > 1 && <span className="block text-[10px] text-text-muted mt-0.5 font-normal">{area}</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <input value={customGoal} onChange={(e) => setCustomGoal(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter' && customGoal.trim()) { store.addCustomSubGoal(customGoal.trim()); setCustomGoal(''); } }}
+                          placeholder="Or type your own goal…"
+                          className="flex-1 bg-white border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-primary/60"
+                        />
+                        <button onClick={() => { if (customGoal.trim()) { store.addCustomSubGoal(customGoal.trim()); setCustomGoal(''); } }}
+                          className="px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-colors"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                      {store.customSubGoals.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {store.customSubGoals.map((g) => (
+                            <span key={g} className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs text-primary font-medium">
+                              {g}
+                              <button onClick={() => store.removeCustomSubGoal(g)} className="hover:text-red-500 transition-colors">×</button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex gap-2 mt-3">
-                      <input value={customGoal} onChange={(e) => setCustomGoal(e.target.value)}
-                        placeholder="Or type your own goal…"
-                        className="flex-1 bg-white border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-primary/60"
-                      />
-                      <button onClick={() => { if (customGoal.trim()) { store.addCustomSubGoal(customGoal.trim()); setCustomGoal(''); } }}
-                        className="px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-colors"
-                      >
-                        <Plus size={16} />
-                      </button>
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 <div className="mb-8">
                   <h3 className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">Timeframe</h3>
@@ -287,7 +308,7 @@ export function OnboardingPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                   <ReviewCard label="Core Values" content={selectedValues.map((v) => v!.label).join(', ') || '–'} accent="#6363E1" />
-                  <ReviewCard label="Priority Area" content={PRIORITY_CATEGORIES.find((c) => store.priorityCategory.includes(c.id))?.label ?? '–'} accent="#8050B8" />
+                  <ReviewCard label="Priority Areas" content={PRIORITY_CATEGORIES.filter((c) => store.priorityCategory.includes(c.id)).map((c) => c.label).join(', ') || '–'} accent="#8050B8" />
                   <ReviewCard label="Goal" content={[...store.subGoals, ...store.customSubGoals].join(', ') || '–'} accent="#2AA890" />
                   <ReviewCard label="Timeframe" content={store.timeframe} accent="#C07050" />
                   <ReviewCard label="Morning Habits" content={`${store.morningRoutines.length} habits selected`} accent="#B04888" />

@@ -172,14 +172,19 @@ export const useAppStore = create<AppState>()(
 
       toggleSubGoal: (goal) =>
         set((state) => ({
-          subGoals: state.subGoals.includes(goal) ? state.subGoals.filter((g) => g !== goal) : [goal],
-          customSubGoals: state.subGoals.includes(goal) ? state.customSubGoals : [],
+          subGoals: state.subGoals.includes(goal)
+            ? state.subGoals.filter((g) => g !== goal)
+            : [...state.subGoals, goal],
         })),
 
       addCustomSubGoal: (goal) => {
         const trimmed = goal.trim();
         if (!trimmed) return;
-        set({ subGoals: [], customSubGoals: [trimmed] });
+        set((state) => ({
+          customSubGoals: state.customSubGoals.includes(trimmed)
+            ? state.customSubGoals
+            : [...state.customSubGoals, trimmed],
+        }));
       },
 
       removeCustomSubGoal: (goal) =>
@@ -195,7 +200,18 @@ export const useAppStore = create<AppState>()(
       setHabitCustomization: (habitId, data) =>
         set((state) => ({ habitCustomizations: { ...state.habitCustomizations, [habitId]: data } })),
 
-      setPriorityCategory: (categories) => set({ priorityCategory: categories.slice(0, 1) }),
+      setPriorityCategory: (categories) =>
+        set((state) => {
+          if (categories.length === 1) {
+            const id = categories[0];
+            return {
+              priorityCategory: state.priorityCategory.includes(id)
+                ? state.priorityCategory.filter((c) => c !== id)
+                : [...state.priorityCategory, id],
+            };
+          }
+          return { priorityCategory: categories };
+        }),
       setTimeframe: (timeframe) => set({ timeframe }),
       setWakeTime: (time) => set({ wakeTime: time }),
       setSleepTime: (time) => set({ sleepTime: time }),
