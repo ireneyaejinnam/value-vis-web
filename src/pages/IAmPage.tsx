@@ -31,10 +31,10 @@ export function IAmPage() {
 
         {/* Overview stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-          <StatCard label="Tasks Done" value={`${totalCompleted}/${totalTasks}`} icon={<CheckSquare size={16} className="text-emerald-500" />} accent="rgba(34,197,94,0.1)" />
-          <StatCard label="Values" value={`${selectedValues.length}/3`} icon={<Sparkles size={16} className="text-primary" />} accent="rgba(99,99,225,0.1)" />
-          <StatCard label="Habits" value={`${store.morningRoutines.length + store.eveningRoutines.length}`} icon={<Activity size={16} className="text-amber-500" />} accent="rgba(245,158,11,0.1)" />
-          <StatCard label="Focus Area" value={priorityCat?.label ?? '—'} icon={<Target size={16} className="text-purple-500" />} accent="rgba(168,85,247,0.1)" />
+          <StatCard label="Tasks Done" value={`${totalCompleted}/${totalTasks}`} icon={<CheckSquare size={16} className="text-emerald-500" />} />
+          <StatCard label="Values" value={`${selectedValues.length}/3`} icon={<Sparkles size={16} className="text-primary" />} />
+          <StatCard label="Habits" value={`${store.morningRoutines.length + store.eveningRoutines.length}`} icon={<Activity size={16} className="text-amber-500" />} />
+          <StatCard label="Focus Area" value={priorityCat?.label ?? '—'} icon={<Target size={16} className="text-purple-500" />} />
         </div>
 
         {/* No values placeholder */}
@@ -52,7 +52,7 @@ export function IAmPage() {
             const stats = getValueStats(value.id);
             const completionRate = stats.linkedTasks > 0 ? (stats.completedTasks / stats.linkedTasks) * 100 : 0;
             return (
-              <div key={value.id} className="bg-white rounded-2xl border p-5 card-hover" style={{ borderColor: value.color + '40', background: value.tintBg }}>
+              <div key={value.id} className="rounded-2xl border p-5 card-hover" style={{ background: value.tintBg, borderColor: value.color + '40' }}>
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <span className="text-xs text-text-muted font-medium">#{idx + 1} Value</span>
@@ -122,9 +122,9 @@ export function IAmPage() {
   );
 }
 
-function StatCard({ label, value, icon, accent }: { label: string; value: string; icon: React.ReactNode; accent: string }) {
+function StatCard({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <div className="bg-white border border-border rounded-2xl p-4 card-hover" style={{ background: accent }}>
+    <div className="bg-white border border-border rounded-2xl p-4 card-hover">
       <div className="flex items-center justify-between mb-2">{icon}<span className="text-xs text-text-muted">{label}</span></div>
       <p className="text-lg font-bold text-text-primary">{value}</p>
     </div>

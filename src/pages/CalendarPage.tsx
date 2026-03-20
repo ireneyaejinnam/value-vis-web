@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { useAppStore } from '../store/useAppStore';
-import { ChevronLeft, ChevronRight, Plus, Check, Trash2, Edit3, Brain, Calendar, Clock, RefreshCw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Brain, Calendar, RefreshCw } from 'lucide-react';
 import { Modal } from '../components/common/Modal';
 import { MentalRehearsalModal } from '../components/calendar/MentalRehearsalModal';
-import { ValueBadge } from '../components/common/ValueBadge';
-import { colorVariantStyle, colorVariantText } from '../components/common/ColorVariantBadge';
+import { colorVariantText } from '../components/common/ColorVariantBadge';
 import { VALUES } from '../constants/onboarding';
 import type { CalendarEvent, ColorVariant } from '../types';
 import { getTodayString } from '../utils/date';
@@ -248,15 +247,13 @@ export function CalendarPage() {
         )}
 
         {/* Calendar view area */}
-        <div className="flex-1 overflow-y-auto bg-bg">
+        <div className={`flex-1 bg-bg ${calView === 'month' ? 'overflow-y-auto' : 'overflow-hidden flex flex-col'}`}>
           {calView === 'day' && (
             <DayView
               date={selectedDate}
               events={selectedEvents}
               today={today}
               onEdit={(e) => { setEditingEvent(e); setShowEventModal(true); }}
-              onDelete={(id) => store.deleteCalendarEvent(id)}
-              onToggle={(id) => store.toggleCalendarEvent(id)}
               onAdd={() => { setEditingEvent(null); setShowEventModal(true); }}
             />
           )}
@@ -266,6 +263,7 @@ export function CalendarPage() {
               today={today}
               eventsForDate={eventsForDate}
               onSelectDate={(d) => { setSelectedDate(d); setCalView('day'); }}
+              onEdit={(e) => { setEditingEvent(e); setShowEventModal(true); }}
             />
           )}
           {calView === 'month' && (
@@ -287,85 +285,179 @@ export function CalendarPage() {
   );
 }
 
-function DayView({ date, events, today, onEdit, onDelete, onToggle, onAdd }: {
-  date: string; events: CalendarEvent[]; today: string;
-  onEdit: (e: CalendarEvent) => void; onDelete: (id: string) => void;
-  onToggle: (id: string) => void; onAdd: () => void;
+const HOUR_HEIGHT = 56;
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
+
+function formatHour(h: number) {
+  if (h === 0) return '12 AM';
+  if (h < 12) return `${h} AM`;
+  if (h === 12) return '12 PM';
+  return `${h - 12} PM`;
+}
+
+function parseMinutes(time: string): number | null {
+  if (!time || time === 'All day') return null;
+  const [h, m] = time.split(':').map(Number);
+  if (isNaN(h)) return null;
+  return h * 60 + (m || 0);
+}
+
+function TimeGrid({ columns, today, onEdit }: {
+  columns: { date: string; label?: string; isSelected?: boolean; events: CalendarEvent[] }[];
+  today: string;
+  onEdit: (e: CalendarEvent) => void;
 }) {
-  const label = date === today ? 'Today' : new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const sorted = [...events].sort((a, b) => {
-    if (a.time === 'All day') return -1;
-    if (b.time === 'All day') return 1;
-    return a.time.localeCompare(b.time);
-  });
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      const scrollTo = Math.max(0, (currentMinutes - 60) / 60 * HOUR_HEIGHT);
+      scrollRef.current.scrollTop = scrollTo;
+    }
+  }, []);
+
   return (
-    <div className="p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-base font-semibold text-text-primary">{label}</h2>
-          <p className="text-xs text-text-muted">{events.length} event{events.length !== 1 ? 's' : ''}</p>
+    <div ref={scrollRef} className="flex-1 overflow-y-auto">
+      <div className="flex" style={{ height: HOUR_HEIGHT * 24 }}>
+        {/* Hour labels */}
+        <div className="w-14 flex-shrink-0 relative border-r border-border">
+          {HOURS.map((h) => (
+            <div key={h} className="absolute right-2 text-[10px] text-text-muted leading-none"
+              style={{ top: h * HOUR_HEIGHT - 6 }}>
+              {h > 0 ? formatHour(h) : ''}
+            </div>
+          ))}
         </div>
+
+        {/* Day columns */}
+        {columns.map((col) => {
+          const isToday = col.date === today;
+          const timed = col.events.filter((e) => e.time !== 'All day' && !e.isAllDay && parseMinutes(e.time) !== null);
+          return (
+            <div key={col.date} className="flex-1 relative border-l border-border min-w-0">
+              {/* Hour lines */}
+              {HOURS.map((h) => (
+                <div key={h} className="absolute w-full border-t border-border/40" style={{ top: h * HOUR_HEIGHT }} />
+              ))}
+              {/* Current time indicator */}
+              {isToday && (
+                <div className="absolute w-full flex items-center z-10 pointer-events-none"
+                  style={{ top: (currentMinutes / 60) * HOUR_HEIGHT }}>
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0 -ml-1.5" />
+                  <div className="flex-1 h-px bg-red-500" />
+                </div>
+              )}
+              {/* Timed events */}
+              {timed.map((e) => {
+                const startMin = parseMinutes(e.time)!;
+                const top = (startMin / 60) * HOUR_HEIGHT;
+                const color = colorVariantText(e.colorVariant);
+                return (
+                  <button key={e.id} onClick={() => onEdit(e)}
+                    className="absolute left-1 right-1 rounded-lg px-1.5 py-1 text-left overflow-hidden hover:opacity-90 transition-opacity"
+                    style={{ top: top + 1, minHeight: 28, background: color + '20', borderLeft: `3px solid ${color}` }}
+                  >
+                    <p className="text-[10px] font-semibold leading-tight truncate" style={{ color }}>{e.title}</p>
+                    <p className="text-[9px] opacity-70 leading-tight" style={{ color }}>{e.time}</p>
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })}
       </div>
-      {sorted.length === 0 ? (
-        <div className="text-center py-20">
-          <Calendar size={36} className="mx-auto text-text-muted mb-3 opacity-50" />
+    </div>
+  );
+}
+
+function DayView({ date, events, today, onEdit, onAdd }: {
+  date: string; events: CalendarEvent[]; today: string;
+  onEdit: (e: CalendarEvent) => void; onAdd: () => void;
+}) {
+  const allDay = events.filter((e) => e.time === 'All day' || e.isAllDay);
+  return (
+    <div className="flex flex-col flex-1 overflow-hidden">
+      {/* All-day events strip */}
+      {allDay.length > 0 && (
+        <div className="flex-shrink-0 border-b border-border px-4 py-2 flex flex-wrap gap-1.5">
+          <span className="text-[10px] text-text-muted w-14 flex-shrink-0 pt-1">All day</span>
+          {allDay.map((e) => {
+            const color = colorVariantText(e.colorVariant);
+            return (
+              <button key={e.id} onClick={() => onEdit(e)}
+                className="text-[10px] font-medium px-2 py-0.5 rounded-md truncate max-w-[160px]"
+                style={{ background: color + '20', color, borderLeft: `3px solid ${color}` }}
+              >
+                {e.title}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {/* Empty state */}
+      {events.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <Calendar size={36} className="text-text-muted mb-3 opacity-50" />
           <p className="text-text-secondary text-sm">No events for this day</p>
           <button onClick={onAdd} className="mt-3 text-primary text-sm hover:underline">Add one</button>
         </div>
       ) : (
-        <div className="space-y-2">
-          {sorted.map((event) => (
-            <EventCard key={event.id} event={event}
-              onEdit={() => onEdit(event)}
-              onDelete={() => onDelete(event.id)}
-              onToggle={() => onToggle(event.id)}
-            />
-          ))}
-        </div>
+        <TimeGrid columns={[{ date, events }]} today={today} onEdit={onEdit} />
       )}
     </div>
   );
 }
 
-function WeekView({ selectedDate, today, eventsForDate, onSelectDate }: {
+function WeekView({ selectedDate, today, eventsForDate, onSelectDate, onEdit }: {
   selectedDate: string; today: string;
   eventsForDate: (d: string) => CalendarEvent[];
   onSelectDate: (d: string) => void;
+  onEdit: (e: CalendarEvent) => void;
 }) {
   const week = getWeekDates(new Date(selectedDate + 'T00:00:00'));
+  const columns = week.map((d) => ({
+    date: toDateStr(d),
+    label: DAY_NAMES[d.getDay()],
+    day: d.getDate(),
+    isSelected: toDateStr(d) === selectedDate,
+    events: eventsForDate(toDateStr(d)),
+  }));
+
   return (
-    <div className="p-4">
-      <div className="grid grid-cols-7 gap-2">
-        {week.map((d) => {
-          const dateStr = toDateStr(d);
-          const events = eventsForDate(dateStr);
-          const isToday = dateStr === today;
-          const isSelected = dateStr === selectedDate;
+    <div className="flex flex-col flex-1 overflow-hidden">
+      {/* Day headers */}
+      <div className="flex flex-shrink-0 border-b border-border bg-surface">
+        <div className="w-14 flex-shrink-0" />
+        {columns.map((col) => {
+          const isToday = col.date === today;
+          const isSelected = col.isSelected;
+          const allDay = col.events.filter((e) => e.time === 'All day' || e.isAllDay);
           return (
-            <div key={dateStr} onClick={() => onSelectDate(dateStr)}
-              className={`min-h-[120px] rounded-2xl border p-2 cursor-pointer transition-all hover:border-primary/40 hover:shadow-sm ${isSelected ? 'border-primary/60 bg-primary/5' : isToday ? 'border-primary/30 bg-primary/5' : 'border-border bg-white'}`}
-            >
-              <div className="flex flex-col items-center mb-2">
-                <span className="text-[10px] text-text-muted font-medium uppercase">{DAY_NAMES[d.getDay()]}</span>
-                <span className={`text-sm font-semibold w-7 h-7 flex items-center justify-center rounded-full mt-0.5 ${isSelected ? 'bg-primary text-white' : isToday ? 'bg-primary/15 text-primary' : 'text-text-primary'}`}>
-                  {d.getDate()}
+            <div key={col.date} className="flex-1 border-l border-border px-1 py-1.5 cursor-pointer hover:bg-surface-2 transition-colors"
+              onClick={() => onSelectDate(col.date)}>
+              <div className="flex items-center gap-1 justify-center mb-1">
+                <span className="text-[10px] text-text-muted font-medium uppercase">{col.label}</span>
+                <span className={`text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full ${isSelected ? 'bg-primary text-white' : isToday ? 'bg-primary/15 text-primary' : 'text-text-primary'}`}>
+                  {col.day}
                 </span>
               </div>
-              <div className="space-y-1">
-                {events.slice(0, 3).map((e) => (
-                  <div key={e.id} className={`text-[10px] leading-snug px-1.5 py-0.5 rounded-md truncate font-medium ${e.completed ? 'opacity-50 line-through' : ''}`}
-                    style={{ background: colorVariantText(e.colorVariant) + '30', color: colorVariantText(e.colorVariant) }}
-                  >
-                    {e.time !== 'All day' ? e.time.slice(0, 5) + ' ' : ''}{e.title}
+              {allDay.map((e) => {
+                const color = colorVariantText(e.colorVariant);
+                return (
+                  <div key={e.id} className="text-[9px] px-1 py-0.5 rounded truncate mb-0.5 font-medium"
+                    style={{ background: color + '20', color }}>
+                    {e.title}
                   </div>
-                ))}
-                {events.length > 3 && <p className="text-[10px] text-text-muted pl-1">+{events.length - 3} more</p>}
-              </div>
+                );
+              })}
             </div>
           );
         })}
       </div>
-      <p className="text-xs text-text-muted text-center mt-4">Click a day to see details</p>
+      {/* Time grid */}
+      <TimeGrid columns={columns} today={today} onEdit={onEdit} />
     </div>
   );
 }
@@ -416,28 +508,6 @@ function MonthView({ year, month, selectedDate, today, eventsForDate, onSelectDa
   );
 }
 
-function EventCard({ event, onEdit, onDelete, onToggle }: { event: CalendarEvent; onEdit: () => void; onDelete: () => void; onToggle: () => void }) {
-  return (
-    <div className="rounded-2xl border p-4 flex items-start gap-3 bg-white card-hover transition-all" style={colorVariantStyle(event.colorVariant)}>
-      <button onClick={onToggle} className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${event.completed ? 'bg-emerald-500 border-emerald-500' : 'border-gray-300 hover:border-primary'}`}>
-        {event.completed && <Check size={10} color="white" />}
-      </button>
-      <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium ${event.completed ? 'line-through text-text-muted' : 'text-text-primary'}`}>{event.title}</p>
-        {event.description && <p className="text-xs text-text-secondary mt-0.5 truncate">{event.description}</p>}
-        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-          {event.time && event.time !== 'All day' && <span className="flex items-center gap-1 text-xs text-text-muted"><Clock size={10} />{event.time}</span>}
-          {event.linkedValue && <ValueBadge valueId={event.linkedValue} />}
-          {event.source === 'external' && <span className="text-xs text-text-muted bg-surface-2 px-1.5 py-0.5 rounded-md">Google</span>}
-        </div>
-      </div>
-      <div className="flex gap-1 flex-shrink-0">
-        <button onClick={onEdit} className="p-1.5 rounded-lg hover:bg-surface-2 text-text-muted hover:text-text-primary transition-colors"><Edit3 size={13} /></button>
-        <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-50 text-text-muted hover:text-red-500 transition-colors"><Trash2 size={13} /></button>
-      </div>
-    </div>
-  );
-}
 
 function EventFormModal({ open, onClose, event, defaultDate }: { open: boolean; onClose: () => void; event: CalendarEvent | null; defaultDate: string }) {
   const store = useAppStore();

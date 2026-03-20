@@ -3,7 +3,7 @@ import { useAppStore } from '../store/useAppStore';
 import { Plus, Check, Trash2, Edit3, ChevronDown, ChevronRight, FolderPlus } from 'lucide-react';
 import { Modal } from '../components/common/Modal';
 import { ValueBadge } from '../components/common/ValueBadge';
-import { colorVariantStyle, colorVariantText } from '../components/common/ColorVariantBadge';
+import { colorVariantText } from '../components/common/ColorVariantBadge';
 import { VALUES } from '../constants/onboarding';
 import type { TodoItem, ColorVariant } from '../types';
 import { COLOR_OPTIONS, BASE_CATEGORIES } from '../types';
@@ -163,7 +163,7 @@ export function TodoPage() {
 
 function TodoCard({ todo, onEdit, onDelete, onToggle }: { todo: TodoItem; onEdit: () => void; onDelete: () => void; onToggle: () => void }) {
   return (
-    <div className="rounded-2xl border bg-white p-4 flex items-start gap-3 card-hover" style={colorVariantStyle(todo.colorVariant)}>
+    <div className="rounded-2xl border border-border bg-white p-4 flex items-start gap-3 card-hover">
       <button onClick={onToggle} className={`mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${todo.completed ? 'bg-emerald-500 border-emerald-500' : 'border-gray-300 hover:border-primary'}`}>
         {todo.completed && <Check size={10} color="white" />}
       </button>
