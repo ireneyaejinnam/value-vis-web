@@ -133,6 +133,55 @@ export async function sendChatMessage(
   }
 }
 
+export async function generateMentalRehearsalScript(date: string): Promise<string> {
+  const state = useAppStore.getState();
+  const selectedValues = state.selectedValueIds
+    .map((id) => VALUES.find((v) => v.id === id))
+    .filter(Boolean) as Value[];
+  const subGoals = [...state.subGoals, ...state.customSubGoals];
+  const todayEvents = state.calendarEvents
+    .filter((e) => e.date === date)
+    .sort((a, b) => a.time.localeCompare(b.time))
+    .map((e) => `• ${e.time === 'All day' ? 'All day' : e.time} — ${e.title}`)
+    .join('\n') || 'No events scheduled';
+
+  const prompt = `Write a 200-word mental rehearsal visualization script for ${state.displayName ?? 'the user'}.
+
+Their core values: ${selectedValues.map((v) => v.label).join(', ') || 'not set'}
+Their goals: ${subGoals.join(', ') || 'not set'}
+Today's schedule:
+${todayEvents}
+
+Structure the script as:
+1. One sentence grounding breath to settle in
+2. Walk through each scheduled event, visualizing it going well and connecting it to their values
+3. Close with a single concrete intention for the day
+
+Write in second person, present tense. Be warm, specific, and personal. Keep it under 220 words.`;
+
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  if (!apiKey) {
+    return `Take a slow, deep breath and let your body settle.\n\nPicture your day unfolding with clarity and intention. Each task you've set for yourself today is an expression of what matters most to you — your values of ${selectedValues.map((v) => v.label).join(' and ') || 'growth and purpose'}.\n\nSee yourself moving through your schedule with focus and calm. When challenges arise, you meet them with the same values that guide your life. You are prepared, grounded, and clear.\n\nYour intention for today: show up fully aligned with who you are becoming.`;
+  }
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      max_tokens: 280,
+      messages: [
+        { role: 'system', content: 'You are a mindfulness and visualization coach. Write concise, personal, calming scripts.' },
+        { role: 'user', content: prompt },
+      ],
+    }),
+  });
+
+  if (!response.ok) throw new Error('Script generation failed');
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content?.trim() ?? '';
+}
+
 const DEMO_RESPONSES = [
   "That's a great question! Based on your core values, I'd suggest focusing on tasks that align with what matters most to you. What specific area would you like to explore?",
   "I can see you're working on some meaningful projects. How are you feeling about the progress so far? Remember, aligning your work with your values helps maintain motivation.",

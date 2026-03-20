@@ -153,7 +153,11 @@ function HabitSection({ title, icon, habits, completions, onToggle, empty }: {
   if (empty) {
     return (
       <div className="mb-8">
-        <div className="flex items-center gap-2 mb-3">{icon}<h2 className="text-base font-semibold text-text-primary">{title}</h2></div>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-border text-sm font-semibold text-text-secondary">
+            {icon}{title}
+          </span>
+        </div>
         <div className="bg-white border border-dashed border-border rounded-2xl p-8 text-center">
           <p className="text-text-muted text-sm">No habits selected. Complete onboarding to add habits.</p>
         </div>
@@ -162,7 +166,11 @@ function HabitSection({ title, icon, habits, completions, onToggle, empty }: {
   }
   return (
     <div className="mb-8">
-      <div className="flex items-center gap-2 mb-4">{icon}<h2 className="text-base font-semibold text-text-primary">{title}</h2></div>
+      <div className="flex items-center gap-2 mb-4">
+        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-sm font-semibold text-primary">
+          {icon}{title}
+        </span>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {habits.map((habit) => (
           <HabitCard key={habit.id} habit={habit} completed={completions.has(habit.id)} onToggle={() => onToggle(habit.id)} />
