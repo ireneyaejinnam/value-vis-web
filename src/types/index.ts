@@ -54,6 +54,7 @@ export interface CalendarEvent {
   title: string;
   description?: string;
   time: string;
+  endTime?: string;
   date: string;
   isAllDay?: boolean;
   linkedValue?: string;
