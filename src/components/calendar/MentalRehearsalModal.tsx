@@ -30,7 +30,6 @@ export function MentalRehearsalModal({ open, onClose, date, initialMood }: Props
   const [error, setError] = useState('');
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const isComplete = store.mentalRehearsalCompletedDates.includes(date);
 
   useEffect(() => {
     if (!open) return;
