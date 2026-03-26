@@ -96,7 +96,6 @@ export function ChatPage() {
       {/* Header */}
       <div className="px-5 py-4 border-b border-border bg-surface flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
-          <img src="/genie/genie_icon.png" alt="Coach" className="w-9 h-9 rounded-xl object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           <div>
             <h1 className="text-sm font-semibold text-text-primary">ValueVis Coach</h1>
             <p className="text-xs text-text-muted">{import.meta.env.VITE_OPENAI_API_KEY ? 'AI-powered · Ready' : 'Demo mode'}</p>
@@ -122,9 +121,6 @@ export function ChatPage() {
                   <button key={action.id} onClick={() => sendMessage(action.prompt)}
                     className="bg-white border border-border rounded-2xl p-4 text-left hover:border-primary/40 hover:shadow-md transition-all card-hover group"
                   >
-                    <img src={action.img} alt={action.label} className="w-12 h-12 rounded-xl object-cover mb-3 group-hover:scale-105 transition-transform"
-                      onError={(e) => { (e.target as HTMLImageElement).src = '/genie/genie_icon.png'; }}
-                    />
                     <p className="text-sm font-semibold text-text-primary leading-tight">{action.label}</p>
                     <p className="text-xs text-text-muted mt-0.5">{action.subtitle}</p>
                   </button>
@@ -148,12 +144,6 @@ export function ChatPage() {
           {/* Loading dots */}
           {streaming && !streamingText && (
             <div className="flex items-start gap-3">
-              <img src="/genie/genie_icon.png" alt="Coach" className="w-7 h-7 rounded-lg object-cover flex-shrink-0 mt-1"
-                onError={(e) => {
-                  const el = e.target as HTMLImageElement;
-                  el.style.display = 'none';
-                }}
-              />
               <div className="bg-white border border-border rounded-2xl rounded-tl-none px-4 py-3">
                 <div className="flex gap-1 items-center h-5">
                   {[0,1,2].map((i) => (
@@ -212,17 +202,7 @@ function MessageBubble({ content, sender, timestamp, streaming }: {
   const isUser = sender === 'user';
   return (
     <div className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-      {!isUser && (
-        <img src="/genie/genie_icon.png" alt="Coach" className="w-7 h-7 rounded-lg object-cover flex-shrink-0 mt-1"
-          onError={(e) => {
-            const el = e.target as HTMLImageElement;
-            el.replaceWith(Object.assign(document.createElement('div'), {
-              className: 'w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1',
-              innerHTML: '<span style="color:#6363E1;font-size:14px">✦</span>',
-            }));
-          }}
-        />
-      )}
+      {!isUser && null}
       <div className={`max-w-[75%] flex flex-col gap-1 ${isUser ? 'items-end' : 'items-start'}`}>
         <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
           isUser

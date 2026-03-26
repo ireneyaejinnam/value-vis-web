@@ -113,13 +113,6 @@ export function MentalRehearsalModal({ open, onClose, date, initialMood }: Props
 
         <div className="overflow-y-auto flex-1">
           {/* Banner */}
-          <img
-            src={phase === 'complete' || isComplete ? '/genie/rehearsal_complete.png' : '/genie/rehearsal_banner.png'}
-            alt="Mental Rehearsal"
-            className="w-full object-cover"
-            style={{ aspectRatio: '956/336' }}
-          />
-
           <div className="p-5 space-y-5">
 
             {/* Pre-mood */}

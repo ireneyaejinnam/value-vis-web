@@ -228,12 +228,6 @@ export function CalendarPage() {
               <button onClick={() => setShowMR(true)}
                 className="w-full rounded-2xl overflow-hidden border border-border hover:border-primary/40 hover:shadow-md transition-all group"
               >
-                <img
-                  src={mrCompleted ? '/genie/rehearsal_complete.png' : '/genie/rehearsal_banner.png'}
-                  alt="Mental Rehearsal"
-                  className="w-full object-cover group-hover:opacity-95 transition-opacity"
-                  style={{ aspectRatio: '956/336' }}
-                />
                 <div className={`px-3 py-2 flex items-center justify-between ${mrCompleted ? 'bg-emerald-50' : 'bg-white'}`}>
                   <span className={`text-xs font-semibold ${mrCompleted ? 'text-emerald-600' : 'text-primary'}`}>
                     {mrCompleted ? 'Rehearsed ✓' : 'Mental Rehearsal'}
@@ -924,8 +918,6 @@ function InlineChat() {
       {/* Header */}
       <div className="px-3 py-2.5 border-b border-border flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
-          <img src="/genie/genie_icon.png" alt="Coach" className="w-7 h-7 rounded-lg object-cover flex-shrink-0"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           <div>
             <p className="text-xs font-semibold text-text-primary">ValueVis Coach</p>
             <p className="text-[10px] text-text-muted">Plan your day with AI</p>
